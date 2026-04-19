@@ -21,7 +21,7 @@ def generate_explanations(image_path, models, detected):
 
         keywords = extract_keywords_from_heatmap(heatmap, "Diabetic Retinopathy")
 
-        explanations["DR"] = {
+        explanations["Diabetic Retinopathy"] = {
             "image": overlay_heatmap(image_path, heatmap),
             "keywords": keywords
         }
@@ -73,7 +73,7 @@ def generate_explanations(image_path, models, detected):
 
         keywords = extract_keywords_from_heatmap(heatmap, "Diabetic Macular Edema")
 
-        explanations["DME"] = {
+        explanations["Diabetic Macular Edema"] = {
             "image": overlay_heatmap(image_path, heatmap),
             "keywords": keywords
         }

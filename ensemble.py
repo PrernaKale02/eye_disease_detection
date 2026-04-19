@@ -36,14 +36,36 @@ def ensemble_decision(results):
         detected.append(("Cataract", cataract_prob))
 
     # ---------------- Most likely disease ----------------
-    if detected:
+    # determine most likely disease
+    disease_names = [d[0] for d in detected]
+
+    # ---------------- Special DR + DME rule ----------------
+    dr_conf = None
+    dme_conf = None
+
+    for d, conf in detected:
+        if d == "Diabetic Retinopathy":
+            dr_conf = conf
+        if d == "Diabetic Macular Edema":
+            dme_conf = conf
+
+    # Apply rule only if DR and DME are the only diseases detected
+    if (
+        dr_conf is not None
+        and dme_conf is not None
+        and len(detected) == 2
+        and dme_conf >= 0.60
+    ):
+        most_likely = "Diabetic Macular Edema"
+
+    elif detected:
         most_likely = max(detected, key=lambda x: x[1])[0]
+
     else:
         most_likely = "No disease detected"
-
     detected = sorted(detected, key=lambda x: x[1], reverse=True)
     
     return {
-        "most_likely_disease": detected[0][0] if detected else "None",
+        "most_likely_disease": most_likely,
         "detected_conditions": detected
     }

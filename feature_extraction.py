@@ -23,22 +23,35 @@ def generate_text_explanation(final_result, model_results):
     explanation.append("")
     explanation.append("Explanation:")
 
-    if "Glaucoma" in [d[0] for d in detected]:
+    detected_names = [d[0] for d in detected]
+
+    # ---------------- Special DR + DME explanation ----------------
+    if "Diabetic Retinopathy" in detected_names and "Diabetic Macular Edema" in detected_names:
+
+        explanation.append(
+            "Diabetic Macular Edema (DME) has been detected as a complication of Diabetic Retinopathy. "
+            "DME occurs when damaged retinal blood vessels caused by diabetic retinopathy leak fluid "
+            "into the macula, the central part of the retina responsible for sharp vision."
+        )
+
+    # ---------------- Individual disease explanations ----------------
+
+    if "Glaucoma" in detected_names:
         explanation.append(
             "Grad-CAM highlights regions around the optic disc, suggesting structural patterns associated with glaucoma."
         )
 
-    if "Diabetic Macular Edema" in [d[0] for d in detected]:
+    if "Diabetic Macular Edema" in detected_names:
         explanation.append(
             "Highlighted regions near the macula indicate fluid accumulation patterns consistent with diabetic macular edema."
         )
 
-    if "Diabetic Retinopathy" in [d[0] for d in detected]:
+    if "Diabetic Retinopathy" in detected_names:
         explanation.append(
             "The model identified retinal lesion patterns such as microaneurysms or hemorrhage-like structures associated with diabetic retinopathy."
         )
 
-    if "Cataract" in [d[0] for d in detected]:
+    if "Cataract" in detected_names:
         explanation.append(
             "Opacity-related visual patterns detected by the model suggest the presence of cataract."
         )
@@ -46,8 +59,6 @@ def generate_text_explanation(final_result, model_results):
     return "\n".join(explanation)
 
 import numpy as np
-
-
 def extract_keywords_from_heatmap(heatmap, disease):
 
     h, w = heatmap.shape

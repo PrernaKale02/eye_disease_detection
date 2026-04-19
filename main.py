@@ -5,6 +5,8 @@ from predict import predict_all
 from ensemble import ensemble_decision
 from explain import generate_explanations
 from feature_extraction import generate_text_explanation
+from clinical_explainer import build_clinical_report
+from keywords_config import DISEASE_CONFIG
 
 
 # ------------------------------------------------
@@ -52,6 +54,32 @@ explanations = generate_explanations(
     detected_diseases
 )
 
+print("\nClinical Analysis\n----------------")
+
+for disease, data in explanations.items():
+
+    keywords = data["keywords"]
+
+    prediction = model_results[DISEASE_CONFIG[disease]["model_key"]]["prediction"]
+
+    confidence = model_results[DISEASE_CONFIG[disease]["model_key"]]["confidence"]
+
+    report = build_clinical_report(
+        disease,
+        prediction,
+        confidence,
+        keywords
+    )
+
+    print(f"\nDisease: {report['disease']}")
+    print(f"Stage: {report['stage']}")
+    print(f"Risk Level: {report['risk']}")
+    print("\nExplanation:")
+    print(report["explanation"])
+
+    print("\nClinical Recommendation:")
+    print(report["advice"])
+
 # ------------------------------------------------
 # Save Grad-CAM images
 # ------------------------------------------------
@@ -59,8 +87,7 @@ for disease, data in explanations.items():
 
     img = data["image"]
     keywords = data["keywords"]
-    if not keywords:
-        keywords.append("retinal region activation detected")
+    features = keywords if keywords else ["retinal region activation detected"]
 
     output_path = f"outputs/{disease}_gradcam.jpg"
 
