@@ -16,36 +16,463 @@ from predict import predict_all
 st.set_page_config(page_title="Retinal Disease Detection", page_icon="◉", layout="wide")
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
-:root{--bg:#07111f;--panel:#0c1a2c;--line:#20344c;--text:#e8f0fa;--muted:#91a4bb;--cyan:#46c8e8}
-html,body,[class*="css"]{font-family:'DM Sans',sans-serif}.stApp{background:radial-gradient(ellipse at 78% -12%,rgba(27,123,167,.18),transparent 38%),var(--bg);color:var(--text)}
-#MainMenu,footer{visibility:hidden}.block-container{max-width:1420px;padding:1.15rem 2.2rem 2rem}[data-testid="stHeader"]{background:transparent}
-.hero{padding:22px 26px 20px;border:1px solid rgba(96,174,212,.2);border-radius:18px;background:linear-gradient(110deg,#0e2338,#0a1829);margin-bottom:20px;position:relative;overflow:hidden}.hero:after{content:'';position:absolute;right:-55px;top:-110px;width:300px;height:300px;background:radial-gradient(circle,rgba(70,200,232,.14),transparent 68%);pointer-events:none}.eyebrow,.kicker{font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--cyan)}
-.hero h1{font:800 clamp(25px,3vw,36px)/1.15 Manrope,sans-serif;margin:8px 0 6px;color:#f3f8ff}.hero p{color:#a7b8cc;font-size:14px;margin:0;max-width:730px}.hero-badge{float:right;border:1px solid #2b5269;border-radius:999px;padding:7px 11px;color:#a9dced;font-size:10px;letter-spacing:1px;font-weight:700;background:#10283a}
-.panel{background:linear-gradient(145deg,#0e1d2f,#0a1625);border:1px solid var(--line);border-radius:15px;padding:18px 20px;box-shadow:0 10px 28px #0002;margin-bottom:14px}.tight{padding:15px 17px}.panel h2,.panel h3{font-family:Manrope,sans-serif;color:#edf5ff;margin:2px 0 7px}.panel h2{font-size:18px}.panel h3{font-size:15px}.muted{color:var(--muted);font-size:13px;line-height:1.55}.badge{display:inline-block;padding:5px 10px;border:1px solid #31516b;border-radius:999px;background:#10283a;color:#b6e7f4;font-size:10px;font-weight:700;letter-spacing:.5px}.good{color:#b9f1dc;border-color:#28624f;background:#102b27}.alert{color:#ffd8d9;border-color:#71424a;background:#301d26}
-.result{border-radius:16px;padding:22px 24px;border:1px solid #28624f;background:linear-gradient(120deg,#0d2f27,#0c1d2a);margin:14px 0}.result.disease{border-color:#71464b;background:linear-gradient(120deg,#341d25,#131d2b)}.result-name{font:800 clamp(23px,3vw,32px)/1.15 Manrope,sans-serif;margin:7px 0;color:#f4f8fd}.result-desc{font-size:14px;color:#b8c8d9}.confidence{font:800 28px Manrope,sans-serif;color:#edfaff}.stat-label{color:#91a6bd;font-size:10px;text-transform:uppercase;letter-spacing:1.2px;font-weight:700}.meter{height:6px;border-radius:99px;background:#1b2a3b;margin-top:9px;overflow:hidden}.meter span{height:100%;display:block;border-radius:99px;background:linear-gradient(90deg,#39a9d5,#69dfce)}
-.model-card{height:100%;min-height:120px;background:#0a1727;border:1px solid #1b3047;border-radius:12px;padding:14px}.model-title{font-size:12px;color:#a5b8cc;margin-bottom:7px}.model-pred{font-weight:700;font-size:15px;color:#eef5fd;min-height:23px}.model-prob{font-size:11px;color:var(--muted);margin-top:8px}.small-note{font-size:11px;color:#93a8bd;line-height:1.5}.caption{font-size:10px;text-align:center;text-transform:uppercase;letter-spacing:1px;color:#8da5bc;margin:5px 0 10px}
-.stProgress>div>div>div>div{background:linear-gradient(90deg,#31a6d7,#62d6c7)}[data-testid="stFileUploader"]{background:#091727;border:1px dashed #36536b;border-radius:12px;padding:12px}[data-testid="stFileUploader"]:hover{border-color:var(--cyan)}[data-testid="stFileUploader"] label{color:#c6d4e2}[data-testid="stImage"] img{border-radius:12px;border:1px solid #243b53}.stSpinner>div{border-top-color:var(--cyan)}div[data-testid="stExpander"]{border:1px solid var(--line);border-radius:12px;background:#0b1929}.footer{text-align:center;border-top:1px solid #1b2c40;padding:16px 8px 2px;color:#8298af;font-size:11px;line-height:1.7;margin-top:20px}
-@media(max-width:800px){.block-container{padding:.7rem .8rem 1.5rem}.hero{padding:18px}.hero-badge{float:none;display:inline-block;margin-bottom:6px}.panel{padding:15px}}
+    :root {
+        color-scheme: light;
+        --page: #f3f7fb;
+        --surface: #ffffff;
+        --surface-subtle: #f7fafc;
+        --border: #d9e4ee;
+        --ink: #172b3f;
+        --muted: #52677c;
+        --blue: #1769aa;
+        --teal: #087f8c;
+        --teal-soft: #e7f5f4;
+        --danger: #9b3e4a;
+        --shadow: 0 12px 32px rgba(31, 58, 82, .08);
+    }
+
+    html, body, [class*="css"] {
+        font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        color: var(--ink);
+    }
+
+    .stApp {
+        background:
+            radial-gradient(ellipse at 85% 0, rgba(28, 128, 157, .08), transparent 34%),
+            var(--page);
+        color: var(--ink);
+    }
+
+    #MainMenu, footer { visibility: hidden; }
+    [data-testid="stHeader"] { background: transparent; }
+    .block-container {
+        max-width: 1320px;
+        padding: 2rem 2.25rem 3rem;
+    }
+
+    .hero {
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        padding: 1.8rem 2rem;
+        border: 1px solid #d4e5ee;
+        border-radius: 20px;
+        background: linear-gradient(115deg, #ffffff 0%, #eef7fa 100%);
+        box-shadow: var(--shadow);
+    }
+    .hero::after {
+        position: absolute;
+        top: -7rem;
+        right: -3rem;
+        width: 20rem;
+        height: 20rem;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(25, 132, 157, .12), transparent 68%);
+        content: "";
+        pointer-events: none;
+    }
+    .eyebrow, .kicker {
+        color: var(--teal);
+        font-size: .7rem;
+        font-weight: 750;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+    .hero h1 {
+        margin: .5rem 0 .4rem;
+        color: #163650;
+        font-size: clamp(1.8rem, 3vw, 2.35rem);
+        font-weight: 750;
+        line-height: 1.15;
+    }
+    .hero p {
+        max-width: 48rem;
+        margin: 0;
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+    .hero-badge {
+        float: right;
+        padding: .45rem .75rem;
+        border: 1px solid #bddbdc;
+        border-radius: 999px;
+        background: #f0f9f8;
+        color: #12636d;
+        font-size: .68rem;
+        font-weight: 750;
+        letter-spacing: .07em;
+    }
+
+    .panel {
+        margin-bottom: 1rem;
+        padding: 1.25rem 1.4rem;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+    }
+    .tight { padding: 1.05rem 1.2rem; }
+    .panel h2, .panel h3 {
+        margin: .2rem 0 .5rem;
+        color: #193a55;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+    .panel h2 { font-size: 1.2rem; }
+    .panel h3 { font-size: 1.05rem; }
+    .muted {
+        color: var(--muted);
+        font-size: .9rem;
+        line-height: 1.6;
+    }
+    .badge {
+        display: inline-block;
+        padding: .4rem .7rem;
+        border: 1px solid #c8dbe8;
+        border-radius: 999px;
+        background: #f1f7fb;
+        color: #28536e;
+        font-size: .68rem;
+        font-weight: 750;
+        letter-spacing: .04em;
+    }
+    .good {
+        border-color: #b8deda;
+        background: var(--teal-soft);
+        color: #155f5d;
+    }
+    .alert {
+        border-color: #e5c6ca;
+        background: #fff4f3;
+        color: #813640;
+    }
+    .error-card {
+        margin: 1rem 0;
+        padding: 1.15rem 1.3rem;
+        border: 1px solid #e5c6ca;
+        border-left: 4px solid var(--danger);
+        border-radius: 14px;
+        background: #fff8f7;
+        box-shadow: 0 5px 16px rgba(91, 42, 48, .05);
+    }
+    .error-card .kicker { color: var(--danger); }
+    .error-card h3 {
+        margin: .35rem 0 .45rem;
+        color: #702e37;
+        font-size: 1.05rem;
+    }
+    .error-card p {
+        margin: .25rem 0 0;
+        color: #704c50;
+        font-size: .88rem;
+        line-height: 1.55;
+    }
+    .error-card .error-next {
+        color: #563f43;
+        font-weight: 600;
+    }
+
+    .result {
+        margin: 1rem 0;
+        padding: 1.5rem;
+        border: 1px solid #b8deda;
+        border-radius: 18px;
+        background: linear-gradient(120deg, #f0faf7, #ffffff 72%);
+        box-shadow: var(--shadow);
+    }
+    .result.disease {
+        border-color: #e4c5c8;
+        background: linear-gradient(120deg, #fff6f4, #ffffff 72%);
+    }
+    .result-name {
+        margin: .45rem 0;
+        color: #193c54;
+        font-size: clamp(1.55rem, 3vw, 2rem);
+        font-weight: 750;
+        line-height: 1.2;
+    }
+    .result-desc {
+        color: var(--muted);
+        font-size: .95rem;
+        line-height: 1.5;
+    }
+    .confidence-row {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 1.2rem;
+    }
+    .confidence {
+        color: #155f70;
+        font-size: 1.8rem;
+        font-weight: 750;
+    }
+    .stat-label {
+        color: var(--muted);
+        font-size: .68rem;
+        font-weight: 750;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+    }
+    .meter {
+        height: 8px;
+        margin-top: .65rem;
+        overflow: hidden;
+        border-radius: 99px;
+        background: #e4edf2;
+    }
+    .meter span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #247caf, #159b91);
+    }
+    .result-note { margin-top: 1rem; }
+    .section-label { margin: 1.5rem 0 .65rem; }
+
+    .model-card {
+        height: 100%;
+        min-height: 120px;
+        padding: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--surface);
+        box-shadow: 0 5px 16px rgba(31, 58, 82, .05);
+    }
+    .model-title {
+        margin-bottom: .45rem;
+        color: var(--muted);
+        font-size: .78rem;
+        font-weight: 650;
+        line-height: 1.4;
+    }
+    .model-pred {
+        min-height: 1.5rem;
+        color: #193a55;
+        font-size: .98rem;
+        font-weight: 750;
+        overflow-wrap: anywhere;
+    }
+    .model-prob {
+        margin-top: .55rem;
+        color: var(--muted);
+        font-size: .72rem;
+        line-height: 1.4;
+    }
+    .small-note {
+        color: var(--muted);
+        font-size: .75rem;
+        line-height: 1.55;
+    }
+    .caption {
+        margin: .45rem 0 .8rem;
+        color: var(--muted);
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-align: center;
+        text-transform: uppercase;
+    }
+    .progress-panel {
+        margin: 1.25rem 0 1.5rem;
+        padding: 1.05rem 1.25rem;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+    }
+    .progress-steps {
+        display: flex;
+        align-items: flex-start;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .progress-step {
+        position: relative;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        align-items: center;
+        gap: .45rem;
+        color: #738598;
+        text-align: center;
+    }
+    .progress-step:not(:last-child)::after {
+        position: absolute;
+        top: 15px;
+        left: calc(50% + 17px);
+        width: calc(100% - 34px);
+        height: 2px;
+        border-radius: 2px;
+        background: #dce6ed;
+        content: "";
+    }
+    .progress-step.complete:not(:last-child)::after { background: #65aaa6; }
+    .progress-node {
+        z-index: 1;
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border: 1px solid #ccd8e1;
+        border-radius: 50%;
+        background: #f5f8fa;
+        color: #65798c;
+        font-size: .78rem;
+        font-weight: 750;
+    }
+    .progress-label {
+        color: inherit;
+        font-size: .8rem;
+        font-weight: 650;
+        line-height: 1.3;
+    }
+    .progress-step.active { color: var(--teal); }
+    .progress-step.active .progress-node {
+        border-color: var(--teal);
+        background: var(--teal);
+        color: #ffffff;
+        box-shadow: 0 0 0 4px var(--teal-soft);
+    }
+    .progress-step.complete { color: #286f6c; }
+    .progress-step.complete .progress-node {
+        border-color: #65aaa6;
+        background: #e7f5f4;
+        color: #286f6c;
+    }
+
+    [data-testid="stFileUploader"] {
+        padding: .85rem;
+        border: 1px dashed #93b8c9;
+        border-radius: 14px;
+        background: #f7fbfd;
+    }
+    [data-testid="stFileUploader"]:hover { border-color: var(--blue); }
+    [data-testid="stFileUploader"] label { color: #294b63; }
+    [data-testid="stImage"] img {
+        max-width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+    }
+    button {
+        border-radius: 9px !important;
+        font-weight: 650 !important;
+    }
+    button:focus-visible, input:focus-visible, summary:focus-visible,
+    [role="button"]:focus-visible {
+        outline: 3px solid #2384b5 !important;
+        outline-offset: 3px !important;
+    }
+    div[role="alert"] {
+        border: 1px solid #e5c6ca;
+        border-radius: 12px;
+        background: #fff4f3;
+        color: #702e37;
+    }
+    .stSpinner > div { border-top-color: var(--teal); }
+    details {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+    }
+    details summary { color: #193a55; font-weight: 650; }
+    .footer {
+        margin-top: 1.5rem;
+        padding: 1rem .5rem .2rem;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: .75rem;
+        line-height: 1.7;
+        text-align: center;
+    }
+
+    @media (max-width: 800px) {
+        .block-container { padding: 1rem .9rem 2rem; }
+        .hero { padding: 1.25rem; border-radius: 16px; }
+        .hero-badge {
+            float: none;
+            display: inline-block;
+            margin-bottom: .7rem;
+        }
+        .panel { padding: 1rem; }
+        .tight { padding: .9rem; }
+        .result { padding: 1.15rem; }
+    }
+    @media (max-width: 480px) {
+        .progress-panel { padding: .9rem .55rem; }
+        .progress-step { gap: .4rem; }
+        .progress-step:not(:last-child)::after {
+            top: 14px;
+            left: calc(50% + 15px);
+            width: calc(100% - 30px);
+        }
+        .progress-node { width: 30px; height: 30px; }
+        .progress-label { font-size: .68rem; }
+        .confidence-row { align-items: flex-start; flex-direction: column; }
+        .hero p { font-size: .9rem; }
+    }
 </style>""", unsafe_allow_html=True)
 
-st.markdown('<div class="hero"><span class="hero-badge">CLINICAL AI · OPHTHALMOLOGY</span><div class="eyebrow">Retinal imaging · Explainable prediction</div><h1>Retinal Disease Detection</h1><p>AI-powered retinal image analysis with explainable predictions. Explore model outputs and visual attention from a fundus photograph.</p></div>', unsafe_allow_html=True)
+def progress_markup(active_step):
+    labels = ("Upload Image", "Analyze Image", "View Results")
+    steps = []
+    for number, label in enumerate(labels, start=1):
+        state = "complete" if number < active_step else "active" if number == active_step else "upcoming"
+        current = ' aria-current="step"' if number == active_step else ""
+        steps.append(
+            f'<li class="progress-step {state}"{current}>'
+            f'<span class="progress-node">{number}</span>'
+            f'<span class="progress-label">{label}</span></li>'
+        )
+    return (
+        '<div class="progress-panel"><ol class="progress-steps" '
+        'aria-label="Analysis progress">'
+        f'{"".join(steps)}</ol></div>'
+    )
 
+def show_error(title, message, next_step, exception):
+    st.markdown(
+        f'<div class="error-card" role="alert">'
+        f'<div class="kicker">Unable to continue</div>'
+        f'<h3>{html.escape(title)}</h3>'
+        f'<p>{html.escape(message)}</p>'
+        f'<p class="error-next">Next step: {html.escape(next_step)}</p></div>',
+        unsafe_allow_html=True,
+    )
+    with st.expander("Technical details (for developers)"):
+        st.exception(exception)
+
+st.markdown('<header class="hero" aria-labelledby="page-title"><span class="hero-badge">CLINICAL AI · OPHTHALMOLOGY</span><div class="eyebrow">Retinal imaging · Explainable prediction</div><h1 id="page-title">Retinal Disease Detection</h1><p>AI-powered retinal image analysis with explainable predictions. Explore model outputs and visual attention from a fundus photograph.</p></header>', unsafe_allow_html=True)
+
+progress_display = st.empty()
 left, right = st.columns([1, 1.38], gap="medium")
 with left:
     st.markdown('<div class="panel"><div class="kicker">01 · Image input</div><h2>Upload Fundus Image</h2><div class="muted">Upload a retinal fundus image to begin automated analysis.</div>', unsafe_allow_html=True)
     uploaded = st.file_uploader("Choose a JPG or PNG fundus image", type=["jpg", "jpeg", "png"])
     st.markdown('<div class="small-note">Accepted: JPG, JPEG, PNG · Inference resolution: 224 × 224</div></div>', unsafe_allow_html=True)
+
+progress_display.markdown(
+    progress_markup(2 if uploaded else 1),
+    unsafe_allow_html=True,
+)
+
 with right:
     if uploaded:
         try:
             image = Image.open(uploaded).convert("RGB")
         except Exception as exc:
-            st.error("This image could not be opened. Please upload a valid JPG or PNG.")
-            st.exception(exc)
+            show_error(
+                "This image could not be opened",
+                "The selected file could not be read as an image.",
+                "Choose a valid JPG or PNG image and try again.",
+                exc,
+            )
             st.stop()
         st.markdown('<div class="panel tight"><div class="kicker">Image preview</div><h3>Ready for analysis</h3>', unsafe_allow_html=True)
-        st.image(image, width=360)
+        st.image(image, use_container_width=True)
         st.markdown(f'<span class="badge good">IMAGE READY</span> <span class="small-note">{html.escape(uploaded.name)} · {image.width} × {image.height} px</span></div>', unsafe_allow_html=True)
     else:
         st.markdown('<div class="panel tight"><div class="kicker">Image preview</div><h3>Ready when you are</h3><div class="muted">Your preview and image dimensions will appear here after upload.</div><div style="height:115px"></div></div>', unsafe_allow_html=True)
@@ -68,10 +495,15 @@ try:
         model_results = predict_all(image_path)
         final_result = ensemble_decision(model_results)
     elapsed = time.perf_counter() - started
+    progress_display.markdown(progress_markup(3), unsafe_allow_html=True)
     st.markdown(f'<span class="badge good">ANALYSIS COMPLETE</span> <span class="small-note">Inference finished in {elapsed:.1f} seconds</span></div>', unsafe_allow_html=True)
 except Exception as exc:
-    st.error("Analysis could not be completed. Check that all model files are available and compatible.")
-    st.exception(exc)
+    show_error(
+        "Image analysis failed",
+        "The application could not complete the model analysis. This may be due to unavailable model files or another processing issue.",
+        "Confirm the required model files are present and configured, then try again. If the problem continues, share the technical details with the application maintainer.",
+        exc,
+    )
     st.stop()
 
 detected = final_result.get("detected_conditions", [])
@@ -129,17 +561,21 @@ if detected:
             st.markdown(f'<div class="panel tight"><div class="kicker">Grad-CAM · {html.escape(disease)}</div><h3>Model attention overlay</h3>', unsafe_allow_html=True)
             orig, overlay = st.columns(2, gap="medium")
             with orig:
-                st.image(image, width=360)
+                st.image(image, use_container_width=True)
                 st.markdown('<div class="caption">Original fundus image</div>', unsafe_allow_html=True)
             with overlay:
-                st.image(data["image"], width=360)
+                st.image(data["image"], use_container_width=True)
                 st.markdown('<div class="caption">Grad-CAM overlay</div>', unsafe_allow_html=True)
             if data.get("keywords"):
                 st.markdown("**Activation cues:** " + " · ".join(html.escape(str(value)) for value in data["keywords"]))
             st.markdown('<div class="small-note">The current Grad-CAM function returns an overlay; it does not expose a standalone heatmap image.</div></div>', unsafe_allow_html=True)
     except Exception as exc:
-        st.warning("Grad-CAM could not be generated for this result. The prediction remains available above.")
-        st.exception(exc)
+        show_error(
+            "Visual explanation could not be generated",
+            "The prediction is available, but the optional Grad-CAM visualization failed.",
+            "Review the prediction above. If you need the visual explanation, share the technical details with the application maintainer.",
+            exc,
+        )
 
 with st.expander("Technical Details"):
     st.markdown("**Models:** ResNet50 (DR), EfficientNet-B3 (DME), EfficientNetB0 (Glaucoma and Cataract)  \n**Input resolution:** 224 × 224 pixels  \n**Ensemble:** configured thresholds, confidence ranking, DR + DME rule  \n**Explainability:** TensorFlow Grad-CAM and PyTorch Grad-CAM for detected conditions  \n**Framework:** Streamlit, TensorFlow/Keras, PyTorch, OpenCV  \n**Processing:** Complete")
